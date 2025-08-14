@@ -1,0 +1,14 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+  main:
+    allow-bean-definition-overriding: true
+
+logging:
+  level:
+    com.meowtown: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
