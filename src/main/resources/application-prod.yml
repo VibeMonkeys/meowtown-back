@@ -12,24 +12,13 @@ spring:
       max-lifetime: 1800000
       leak-detection-threshold: 60000
       
-  data:
-    redis:
-      # Railway Redis configuration
-      host: ${REDIS_HOST:${REDISHOST:localhost}}
-      port: ${REDIS_PORT:${REDISPORT:6379}}
-      password: ${REDIS_PASSWORD:${REDISPASSWORD:}}
-      database: 0
-      ssl: ${REDIS_SSL:false}
-      timeout: 5000ms
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 2
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
