@@ -20,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "https://meowtown-front-yasyjc9vm-kimkyunghun3s-projects.vercel.app"}, allowCredentials = "true")
 public class AuthController {
     
     private final AuthService authService;

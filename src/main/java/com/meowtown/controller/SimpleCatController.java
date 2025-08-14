@@ -11,7 +11,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/cats")
-@CrossOrigin(origins = "http://localhost:3001")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "https://meowtown-front-yasyjc9vm-kimkyunghun3s-projects.vercel.app"}, allowCredentials = "true")
 public class SimpleCatController {
 
     private static final List<Map<String, Object>> MOCK_CATS = new ArrayList<>();
