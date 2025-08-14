@@ -1,0 +1,57 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+      ssl: ${REDIS_SSL:false}
+      
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+logging:
+  level:
+    com.meowtown: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Production security settings
+server:
+  ssl:
+    enabled: ${SSL_ENABLED:false}
+  error:
+    include-stacktrace: never
+    include-message: never
+
+# Strict CORS in production
+cors:
+  allowed-origins: ${CORS_ORIGIN}
+
+# Production-specific rate limiting (stricter)
+rate-limit:
+  general:
+    requests: 60
+    per: 60
+  upload:
+    requests: 10
+    per: 60

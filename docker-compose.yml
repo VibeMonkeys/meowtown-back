@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database with PostGIS extension
+  meowtown-postgres:
+    image: postgis/postgis:16-3.4
+    container_name: meowtown-postgres
+    environment:
+      POSTGRES_DB: meowtown_dev
+      POSTGRES_USER: meowtown
+      POSTGRES_PASSWORD: meowtown123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+      TZ: Asia/Seoul
+    ports:
+      - "5432:5432"
+    volumes:
+      - meowtown_postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/01-init-db.sql
+    networks:
+      - meowtown-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meowtown -d meowtown_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache Server
+  meowtown-redis:
+    image: redis:7.2-alpine
+    container_name: meowtown-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - meowtown_redis_data:/data
+      - ./docker/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - meowtown-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # pgAdmin (PostgreSQL 관리 도구)
+  meowtown-pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: meowtown-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@meowtown.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "8081:80"
+    volumes:
+      - meowtown_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      meowtown-postgres:
+        condition: service_healthy
+    networks:
+      - meowtown-network
+    restart: unless-stopped
+
+  # Redis Insight (Redis 관리 도구)
+  meowtown-redisinsight:
+    image: redislabs/redisinsight:latest
+    container_name: meowtown-redisinsight
+    ports:
+      - "8082:8001"
+    volumes:
+      - meowtown_redisinsight_data:/db
+    depends_on:
+      - meowtown-redis
+    networks:
+      - meowtown-network
+    restart: unless-stopped
+
+networks:
+  meowtown-network:
+    driver: bridge
+    name: meowtown-network
+
+volumes:
+  meowtown_postgres_data:
+    name: meowtown_postgres_data
+  meowtown_redis_data:
+    name: meowtown_redis_data
+  meowtown_pgadmin_data:
+    name: meowtown_pgadmin_data
+  meowtown_redisinsight_data:
+    name: meowtown_redisinsight_data
