@@ -1,29 +1,30 @@
 package com.meowtown.controller;
 
 import com.meowtown.common.ApiResponse;
-import com.meowtown.entity.User;
-import com.meowtown.service.AuthService;
-import jakarta.servlet.http.HttpSession;
+import com.meowtown.security.JwtTokenProvider;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "https://meowtown-front-yasyjc9vm-kimkyunghun3s-projects.vercel.app"}, allowCredentials = "true")
 public class AuthController {
     
-    private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final PasswordEncoder passwordEncoder;
     
     @Data
     public static class LoginRequest {
@@ -59,105 +60,79 @@ public class AuthController {
         private String email;
         private String displayName;
         
-        public static UserResponse from(User user) {
+        public static UserResponse testUser(String userId) {
             UserResponse response = new UserResponse();
-            response.userId = user.getUserId();
-            response.email = user.getEmail();
-            response.displayName = user.getDisplayName();
+            response.userId = userId;
+            response.email = userId + "@example.com";
+            response.displayName = "Test " + userId;
             return response;
         }
     }
     
     /**
-     * 로그인
+     * 로그인 (테스트용 하드코딩)
      */
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<Map<String, Object>>> login(
-            @Valid @RequestBody LoginRequest request,
-            HttpSession session) {
+            @Valid @RequestBody LoginRequest request) {
         
-        try {
-            Optional<User> userOpt = authService.login(request.getUserId(), request.getPassword());
+        log.info("Login attempt for user: {}", request.getUserId());
+        
+        // 테스트용 하드코딩된 유저 (실제로는 DB에서 조회해야 함)
+        if ("testuser".equals(request.getUserId()) && "test123".equals(request.getPassword())) {
+            // JWT 토큰 생성
+            String token = jwtTokenProvider.createToken(request.getUserId(), "ROLE_USER");
             
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
-                
-                // 세션에 사용자 정보 저장
-                session.setAttribute("userId", user.getUserId());
-                session.setAttribute("user", user);
-                
-                Map<String, Object> result = new HashMap<>();
-                result.put("user", UserResponse.from(user));
-                result.put("token", session.getId()); // 세션 ID를 토큰처럼 사용
-                result.put("tokenType", "session");
-                
-                return ResponseEntity.ok(ApiResponse.success(result, "로그인 성공"));
-            } else {
-                return ResponseEntity.badRequest()
-                        .body(ApiResponse.error("사용자 ID 또는 비밀번호가 올바르지 않습니다."));
-            }
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("로그인 중 오류가 발생했습니다: " + e.getMessage()));
+            Map<String, Object> result = new HashMap<>();
+            result.put("user", UserResponse.testUser(request.getUserId()));
+            result.put("token", token);
+            result.put("tokenType", "Bearer");
+            
+            log.info("Login successful for user: {}, JWT token generated", request.getUserId());
+            return ResponseEntity.ok(ApiResponse.success(result, "로그인 성공"));
         }
+        
+        log.warn("Login failed for user: {}", request.getUserId());
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error("사용자 ID 또는 비밀번호가 올바르지 않습니다."));
     }
     
     /**
-     * 회원가입
+     * 회원가입 (테스트용 간단 구현)
      */
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Map<String, Object>>> register(
-            @Valid @RequestBody RegisterRequest request,
-            HttpSession session) {
+            @Valid @RequestBody RegisterRequest request) {
         
-        try {
-            User user = authService.register(
-                    request.getUserId(),
-                    request.getEmail(),
-                    request.getDisplayName(),
-                    request.getPassword()
-            );
-            
-            // 회원가입 후 자동 로그인
-            session.setAttribute("userId", user.getUserId());
-            session.setAttribute("user", user);
-            
-            Map<String, Object> result = new HashMap<>();
-            result.put("user", UserResponse.from(user));
-            result.put("token", session.getId());
-            result.put("tokenType", "session");
-            
-            return ResponseEntity.ok(ApiResponse.success(result, "회원가입 성공"));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("회원가입 중 오류가 발생했습니다: " + e.getMessage()));
-        }
+        log.info("Registration attempt for user: {}", request.getUserId());
+        
+        // 테스트용 간단한 회원가입 (실제로는 DB 저장 필요)
+        String token = jwtTokenProvider.createToken(request.getUserId(), "ROLE_USER");
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("user", UserResponse.testUser(request.getUserId()));
+        result.put("token", token);
+        result.put("tokenType", "Bearer");
+        
+        log.info("Registration successful for user: {}, JWT token generated", request.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(result, "회원가입 성공"));
     }
     
     /**
-     * 로그아웃
+     * 로그아웃 (JWT는 클라이언트에서 토큰 삭제)
      */
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<String>> logout(HttpSession session) {
-        session.invalidate();
+    public ResponseEntity<ApiResponse<String>> logout() {
+        log.info("Logout requested");
         return ResponseEntity.ok(ApiResponse.success("로그아웃 성공"));
     }
     
     /**
-     * 현재 사용자 정보 조회
+     * 인증 확인 (JWT 토큰 검증)
      */
-    @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        
-        if (user != null) {
-            return ResponseEntity.ok(ApiResponse.success(UserResponse.from(user)));
-        } else {
-            return ResponseEntity.status(401)
-                    .body(ApiResponse.error("인증되지 않은 사용자입니다."));
-        }
+    @GetMapping("/check")
+    public ResponseEntity<ApiResponse<String>> checkAuth() {
+        log.info("Auth check requested");
+        return ResponseEntity.ok(ApiResponse.success("authenticated", "인증됨"));
     }
 }
