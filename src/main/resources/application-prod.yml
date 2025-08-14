@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}?characterEncoding=UTF-8&useUnicode=true
     username: ${PGUSER}
     password: ${PGPASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -32,6 +32,8 @@ logging:
     org.hibernate: WARN
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  charset:
+    console: UTF-8
 
 # Production security settings
 server:
@@ -46,6 +48,7 @@ server:
   tomcat:
     max-threads: ${SERVER_MAX_THREADS:200}
     accept-count: ${SERVER_ACCEPT_COUNT:100}
+    uri-encoding: UTF-8
 
 # Strict CORS in production
 cors:
