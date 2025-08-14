@@ -42,6 +42,5 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
-    @Builder.Default
-    private boolean active = true;
+    // active 필드 제거 (현재 사용하지 않음)
 }
