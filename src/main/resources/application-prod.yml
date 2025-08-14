@@ -35,6 +35,10 @@ spring:
     properties:
       hibernate:
         format_sql: false
+        
+  # Additional production settings for Railway  
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
 
 logging:
   level:
@@ -87,8 +91,3 @@ management:
       enabled: true
     db:
       enabled: true
-
-# Additional production settings for Railway
-spring:
-  lifecycle:
-    timeout-per-shutdown-phase: 30s
