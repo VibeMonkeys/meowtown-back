@@ -12,10 +12,6 @@ spring:
       max-lifetime: 1800000
       leak-detection-threshold: 60000
       
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-      
   jpa:
     hibernate:
       ddl-auto: update
@@ -76,7 +72,5 @@ management:
       show-details: never
       show-components: never
   health:
-    redis:
-      enabled: true
     db:
       enabled: true
