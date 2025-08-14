@@ -34,7 +34,6 @@ public class AuthService {
                 .email(email)
                 .displayName(displayName)
                 .password(password) // 간단히 평문 저장
-                .active(true)
                 .build();
         
         return userRepository.save(user);
@@ -49,7 +48,7 @@ public class AuthService {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             // 비밀번호 확인 (간단히 평문 비교)
-            if (password.equals(user.getPassword()) && user.isActive()) {
+            if (password.equals(user.getPassword())) {
                 return Optional.of(user);
             }
         }
