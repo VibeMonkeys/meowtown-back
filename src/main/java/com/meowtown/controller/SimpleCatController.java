@@ -1,8 +1,9 @@
 package com.meowtown.controller;
 
-import com.meowtown.entity.User;
-import com.meowtown.util.SessionUtil;
-import jakarta.servlet.http.HttpSession;
+import com.meowtown.dto.UserInfo;
+import com.meowtown.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,8 +12,11 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/cats")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "https://meowtown-front-yasyjc9vm-kimkyunghun3s-projects.vercel.app"}, allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "https://meowtown-front.vercel.app", "https://meowtown-front-btumrmy14-kimkyunghun3s-projects.vercel.app"}, allowCredentials = "true")
+@RequiredArgsConstructor
 public class SimpleCatController {
+    
+    private final JwtUtil jwtUtil;
 
     private static final List<Map<String, Object>> MOCK_CATS = new ArrayList<>();
     
@@ -79,22 +83,20 @@ public class SimpleCatController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createCat(@RequestBody Map<String, Object> catData, HttpSession session) {
+    public ResponseEntity<Map<String, Object>> createCat(@RequestBody Map<String, Object> catData, HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
         
-        // 로그인 확인 (테스트를 위해 임시 비활성화)
-        // User currentUser = SessionUtil.getCurrentUser(session);
-        // if (currentUser == null) {
-        //     response.put("success", false);
-        //     response.put("message", "로그인이 필요합니다.");
-        //     response.put("timestamp", LocalDateTime.now().toString());
-        //     return ResponseEntity.status(401).body(response);
-        // }
+        // JWT 인증 확인
+        String currentUserId = JwtUtil.getCurrentUserId();
+        if (currentUserId == null) {
+            response.put("success", false);
+            response.put("message", "로그인이 필요합니다.");
+            response.put("timestamp", LocalDateTime.now().toString());
+            return ResponseEntity.status(401).body(response);
+        }
         
-        // 임시 테스트 유저
-        User currentUser = new User();
-        currentUser.setUserId("testuser");
-        currentUser.setDisplayName("Test User");
+        // JWT에서 사용자 정보 생성
+        UserInfo currentUser = UserInfo.fromJwt(currentUserId);
         
         // 새 고양이 생성
         Map<String, Object> newCat = new HashMap<>(catData);
@@ -104,7 +106,7 @@ public class SimpleCatController {
         newCat.put("isLiked", false);
         newCat.put("reportCount", 1);
         
-        // 등록자 정보 설정
+        // 등록자 정보 설정 (JWT 기반)
         Map<String, Object> reportedBy = new HashMap<>();
         reportedBy.put("name", currentUser.getDisplayName());
         reportedBy.put("avatar", null);
@@ -137,21 +139,17 @@ public class SimpleCatController {
     }
 
     @PostMapping("/{id}/like")
-    public ResponseEntity<Map<String, Object>> toggleCatLike(@PathVariable String id, HttpSession session) {
+    public ResponseEntity<Map<String, Object>> toggleCatLike(@PathVariable String id, HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
         
-        // 로그인 확인 (테스트를 위해 임시 비활성화)
-        // User currentUser = SessionUtil.getCurrentUser(session);
-        // if (currentUser == null) {
-        //     response.put("success", false);
-        //     response.put("message", "로그인이 필요합니다.");
-        //     response.put("timestamp", LocalDateTime.now().toString());
-        //     return ResponseEntity.status(401).body(response);
-        // }
-        
-        // 임시 테스트 유저
-        User currentUser = new User();
-        currentUser.setUserId("testuser");
+        // JWT 인증 확인
+        String currentUserId = JwtUtil.getCurrentUserId();
+        if (currentUserId == null) {
+            response.put("success", false);
+            response.put("message", "로그인이 필요합니다.");
+            response.put("timestamp", LocalDateTime.now().toString());
+            return ResponseEntity.status(401).body(response);
+        }
         
         // 고양이 찾기
         Optional<Map<String, Object>> catOpt = MOCK_CATS.stream()

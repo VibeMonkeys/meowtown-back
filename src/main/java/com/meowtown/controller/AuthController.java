@@ -20,7 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "https://meowtown-front-yasyjc9vm-kimkyunghun3s-projects.vercel.app"}, allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "https://meowtown-front.vercel.app", "https://meowtown-front-btumrmy14-kimkyunghun3s-projects.vercel.app"}, allowCredentials = "true")
 public class AuthController {
     
     private final JwtTokenProvider jwtTokenProvider;
