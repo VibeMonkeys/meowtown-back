@@ -20,6 +20,9 @@ spring:
     
   data:
     redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
       timeout: 2000ms
       lettuce:
         pool:
@@ -62,7 +65,7 @@ aws:
 api:
   version: v1
   cors:
-    allowed-origins: ${CORS_ORIGIN:http://localhost:3000}
+    allowed-origins: ${CORS_ORIGIN:http://localhost:3000,https://meowtown-front.vercel.app}
     allowed-methods: GET,POST,PUT,DELETE,OPTIONS
     allowed-headers: "*"
     allow-credentials: true
