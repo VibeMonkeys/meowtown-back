@@ -1,0 +1,260 @@
+# Created by https://www.toptal.com/developers/gitignore/api/java,gradle,spring,intellij,macos,windows,linux,docker
+# Edit at https://www.toptal.com/developers/gitignore?templates=java,gradle,spring,intellij,macos,windows,linux,docker
+
+### Java ###
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+replay_pid*
+
+### Gradle ###
+.gradle
+**/build/
+!src/**/build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Avoid ignoring Gradle wrappper properties
+!gradle-wrapper.properties
+
+# Cache of project
+.gradletasknamecache
+
+# Eclipse Gradle plugin generated files
+# Eclipse Core
+.project
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+### Spring ###
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+### Windows ###
+# Windows thumbnail cache files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+### Linux ###
+*~
+
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
+### Docker ###
+# Docker build context
+.dockerignore
+
+# Docker volumes
+docker-volumes/
+data/
+
+### Application Specific ###
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Secret files
+*.key
+*.pem
+*.p12
+*.jks
+secrets/
+
+# Application logs
+logs/
+*.log.*
+application*.log
+
+# Test results
+test-results/
+coverage/
+jacoco/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Temporary directories
+tmp/
+temp/
+cache/
+
+# IDE specific files
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# Spring Boot
+spring-boot-devtools.properties
+
+# H2 Database files (if using H2 for testing)
+*.mv.db
+*.trace.db
+
+# Maven (if switching to Maven later)
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Custom additions for MeowTown project
+# Docker data volumes
+postgres-data/
+redis-data/
+
+# Image uploads (if storing locally)
+uploads/
+images/
+
+# Configuration overrides
+application-local.yml
+application-*.yml.backup
+
+# SSL certificates
+*.crt
+*.csr
+
+# Performance and profiling
+*.hprof
+*.prof
+
+# End of https://www.toptal.com/developers/gitignore/api/java,gradle,spring,intellij,macos,windows,linux,docker
+
+### Project Specific ###
+# Keep gradle wrapper
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Keep important config files
+!docker-compose.yml
+!docker-dev.sh
+!src/main/resources/application*.yml
+
+# Documentation and scripts should be included
+!*.md
+!*.sh
