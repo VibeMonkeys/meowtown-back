@@ -1,53 +1,31 @@
-# Multi-stage build for optimized production image
-FROM gradle:8-jdk21 AS build
+# 단일 스테이지 빌드 (Railway 최적화)
+FROM openjdk:21-jdk-slim
 
-# Set working directory
+# 작업 디렉토리 설정
 WORKDIR /app
 
-# Copy gradle files for dependency caching
-COPY build.gradle gradle.properties ./
-COPY gradle gradle
+# 시스템 업데이트 및 필요한 패키지 설치
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Gradle Wrapper 복사 및 실행 권한 부여
 COPY gradlew ./
+COPY gradle gradle/
+RUN chmod +x gradlew
 
-# Download dependencies (cached layer)
-RUN ./gradlew dependencies --no-daemon
+# 빌드 파일 복사
+COPY build.gradle gradle.properties ./
 
-# Copy source code
-COPY src src
+# 소스 코드 복사
+COPY src src/
 
-# Build the application
-RUN ./gradlew bootJar --no-daemon
+# 애플리케이션 빌드
+RUN ./gradlew bootJar --no-daemon --parallel
 
-# Production stage
-FROM amazoncorretto:21
-
-# Create app user for security
-RUN yum install -y shadow-utils && \
-    groupadd -r app && \
-    useradd -r -g app app && \
-    yum clean all
-
-# Set working directory
-WORKDIR /app
-
-# Copy the JAR file from build stage
-COPY --from=build /app/build/libs/*.jar app.jar
-
-# Change ownership to app user
-RUN chown app:app /app/app.jar
-
-# Switch to non-root user
-USER app
-
-# Expose port
+# 포트 노출
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
+# JVM 옵션 설정
+ENV JAVA_OPTS="-Xmx512m -XX:+UseContainerSupport"
 
-# JVM options for container environment
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -XX:+UseStringDeduplication"
-
-# Run the application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=prod -jar app.jar"]
+# 애플리케이션 실행
+CMD ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=prod -jar build/libs/*.jar"]
