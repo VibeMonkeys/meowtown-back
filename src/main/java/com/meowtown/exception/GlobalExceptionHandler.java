@@ -5,9 +5,6 @@ import com.meowtown.common.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -67,32 +64,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(response);
     }
     
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException e) {
-        log.error("AuthenticationException: {}", e.getMessage(), e);
-        
-        ErrorCode errorCode = e instanceof BadCredentialsException ? 
-                ErrorCode.USER_INVALID_CREDENTIALS : ErrorCode.AUTH_TOKEN_INVALID;
-        
-        ErrorResponse response = new ErrorResponse(
-                errorCode.getCode(),
-                errorCode.getMessage()
-        );
-        
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-    }
-    
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
-        log.error("AccessDeniedException: {}", e.getMessage(), e);
-        
-        ErrorResponse response = new ErrorResponse(
-                ErrorCode.AUTH_PERMISSION_DENIED.getCode(),
-                ErrorCode.AUTH_PERMISSION_DENIED.getMessage()
-        );
-        
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    }
     
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {

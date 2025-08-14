@@ -1,5 +1,5 @@
 # Multi-stage build for optimized production image
-FROM gradle:8.5-jdk21-alpine AS build
+FROM gradle:8-jdk21-alpine AS build
 
 # Set working directory
 WORKDIR /app
@@ -19,15 +19,13 @@ COPY src src
 RUN ./gradlew bootJar --no-daemon
 
 # Production stage
-FROM openjdk:21-jre-slim
+FROM eclipse-temurin:21-jre-alpine
 
-# Create app user for security
-RUN useradd -m -s /bin/bash app
+# Create app user for security (Alpine Linux)
+RUN addgroup -g 1000 app && adduser -D -s /bin/sh -u 1000 -G app app
 
-# Install required packages
-RUN apt-get update && apt-get install -y \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# Install required packages (Alpine)
+RUN apk add --no-cache curl
 
 # Set working directory
 WORKDIR /app

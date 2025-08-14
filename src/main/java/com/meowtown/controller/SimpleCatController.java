@@ -1,5 +1,8 @@
 package com.meowtown.controller;
 
+import com.meowtown.entity.User;
+import com.meowtown.util.SessionUtil;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -76,8 +79,17 @@ public class SimpleCatController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createCat(@RequestBody Map<String, Object> catData) {
+    public ResponseEntity<Map<String, Object>> createCat(@RequestBody Map<String, Object> catData, HttpSession session) {
         Map<String, Object> response = new HashMap<>();
+        
+        // 로그인 확인
+        User currentUser = SessionUtil.getCurrentUser(session);
+        if (currentUser == null) {
+            response.put("success", false);
+            response.put("message", "로그인이 필요합니다.");
+            response.put("timestamp", LocalDateTime.now().toString());
+            return ResponseEntity.status(401).body(response);
+        }
         
         // 새 고양이 생성
         Map<String, Object> newCat = new HashMap<>(catData);
@@ -87,12 +99,11 @@ public class SimpleCatController {
         newCat.put("isLiked", false);
         newCat.put("reportCount", 1);
         
-        if (!newCat.containsKey("reportedBy")) {
-            Map<String, Object> reportedBy = new HashMap<>();
-            reportedBy.put("name", "익명");
-            reportedBy.put("avatar", null);
-            newCat.put("reportedBy", reportedBy);
-        }
+        // 등록자 정보 설정
+        Map<String, Object> reportedBy = new HashMap<>();
+        reportedBy.put("name", currentUser.getDisplayName());
+        reportedBy.put("avatar", null);
+        newCat.put("reportedBy", reportedBy);
         
         MOCK_CATS.add(0, newCat); // 맨 앞에 추가
         
@@ -117,6 +128,53 @@ public class SimpleCatController {
         response.put("message", results.size() + "마리의 고양이를 찾았습니다.");
         response.put("timestamp", LocalDateTime.now().toString());
         
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Map<String, Object>> toggleCatLike(@PathVariable String id, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        // 로그인 확인
+        User currentUser = SessionUtil.getCurrentUser(session);
+        if (currentUser == null) {
+            response.put("success", false);
+            response.put("message", "로그인이 필요합니다.");
+            response.put("timestamp", LocalDateTime.now().toString());
+            return ResponseEntity.status(401).body(response);
+        }
+        
+        // 고양이 찾기
+        Optional<Map<String, Object>> catOpt = MOCK_CATS.stream()
+            .filter(cat -> cat.get("id").equals(id))
+            .findFirst();
+            
+        if (catOpt.isPresent()) {
+            Map<String, Object> cat = catOpt.get();
+            boolean isLiked = (Boolean) cat.get("isLiked");
+            int likes = (Integer) cat.get("likes");
+            
+            // 좋아요 토글
+            boolean newIsLiked = !isLiked;
+            int newLikes = newIsLiked ? likes + 1 : likes - 1;
+            
+            cat.put("isLiked", newIsLiked);
+            cat.put("likes", newLikes);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("catId", id);
+            result.put("isLiked", newIsLiked);
+            result.put("likeCount", newLikes);
+            
+            response.put("success", true);
+            response.put("data", result);
+            response.put("message", newIsLiked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.");
+        } else {
+            response.put("success", false);
+            response.put("message", "고양이를 찾을 수 없습니다.");
+        }
+        
+        response.put("timestamp", LocalDateTime.now().toString());
         return ResponseEntity.ok(response);
     }
 }
