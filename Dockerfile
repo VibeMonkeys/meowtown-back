@@ -1,39 +1,27 @@
-# Railway용 Dockerfile (상세 로깅)
+# Multi-stage build for Railway
+FROM gradle:8.11-jdk21 AS builder
+
+WORKDIR /app
+
+# Copy build files
+COPY build.gradle gradle.properties ./
+COPY src ./src
+
+# Build the application (skip tests for faster build)
+RUN gradle bootJar --no-daemon -x test
+
+# Runtime stage
 FROM openjdk:21-jdk-slim
 
 WORKDIR /app
 
-# 시스템 업데이트
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Copy the built JAR from builder stage
+COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Gradle wrapper 복사
-COPY gradlew .
-COPY gradle gradle/
-RUN chmod +x gradlew
-
-# 빌드 파일 복사
-COPY build.gradle .
-COPY gradle.properties .
-
-# Gradle 정보 출력
-RUN ./gradlew --version
-
-# 소스 복사
-COPY src src/
-
-# 의존성 다운로드 (캐시 활용)
-RUN ./gradlew dependencies --no-daemon --info
-
-# 빌드 (상세 로그)
-RUN ./gradlew bootJar --no-daemon --info --stacktrace
-
-# JAR 파일 확인
-RUN ls -la build/libs/
+# Set production profile
+ENV SPRING_PROFILES_ACTIVE=prod
 
 EXPOSE 8080
 
-# 환경변수 설정
-ENV SPRING_PROFILES_ACTIVE=prod
-
-# JAR 실행
-CMD ["sh", "-c", "java -Xmx512m -jar build/libs/*.jar"]
+# Run the application with optimized JVM settings
+CMD ["java", "-Xmx512m", "-Xms256m", "-jar", "app.jar"]
