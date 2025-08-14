@@ -1,0 +1,60 @@
+# Build artifacts
+/build/
+/.gradle/
+/gradle/
+gradlew
+gradlew.bat
+
+# IDE files
+/.idea/
+/.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+/logs/
+
+# Documentation
+README.md
+DOCKER.md
+CLAUDE.md
+*.md
+
+# Development configuration
+docker-compose.yml
+docker-dev.sh
+/docker/
+
+# Test files
+/src/test/
+
+# Git
+.git/
+.gitignore
+
+# Environment files (security)
+.env
+.env.local
+.env.production
+
+# Temporary files
+/tmp/
+/temp/
+
+# Development databases
+*.db
+*.sqlite
+
+# Disabled/backup files
+/src/disabled/

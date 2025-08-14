@@ -1,0 +1,67 @@
+# Railway-optimized docker-compose for external services
+# Note: Railway typically provides managed PostgreSQL and Redis services
+# This compose file is for local testing with Railway-like environment
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database - use Railway's managed PostgreSQL in production
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: meowtown-postgres-railway
+    environment:
+      POSTGRES_DB: ${PGDATABASE:-meowtown}
+      POSTGRES_USER: ${PGUSER:-meowtown}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-railway123}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+      TZ: UTC
+    ports:
+      - "${PGPORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-meowtown} -d ${PGDATABASE:-meowtown}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - railway-network
+
+  # Redis Cache - use Railway's managed Redis in production  
+  redis:
+    image: redis:7.2-alpine
+    container_name: meowtown-redis-railway
+    environment:
+      - REDIS_PASSWORD=${REDISPASSWORD:-}
+    ports:
+      - "${REDISPORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: >
+      sh -c "
+        if [ -n \"$$REDIS_PASSWORD\" ]; then
+          redis-server --requirepass $$REDIS_PASSWORD --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+        else
+          redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+        fi
+      "
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - railway-network
+
+networks:
+  railway-network:
+    driver: bridge
+    name: railway-network
+
+volumes:
+  postgres_data:
+    name: railway_postgres_data
+  redis_data:
+    name: railway_redis_data
