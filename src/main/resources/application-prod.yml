@@ -31,10 +31,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
         
   # Additional production settings for Railway  
   lifecycle:
@@ -42,11 +43,9 @@ spring:
 
 logging:
   level:
-    com.meowtown: DEBUG
-    org.springframework.boot.autoconfigure: DEBUG
-    org.springframework.jdbc: DEBUG
-    com.zaxxer.hikari: DEBUG
-    org.hibernate: DEBUG
+    com.meowtown: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
