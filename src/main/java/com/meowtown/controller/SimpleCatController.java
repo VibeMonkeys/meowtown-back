@@ -82,14 +82,19 @@ public class SimpleCatController {
     public ResponseEntity<Map<String, Object>> createCat(@RequestBody Map<String, Object> catData, HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         
-        // 로그인 확인
-        User currentUser = SessionUtil.getCurrentUser(session);
-        if (currentUser == null) {
-            response.put("success", false);
-            response.put("message", "로그인이 필요합니다.");
-            response.put("timestamp", LocalDateTime.now().toString());
-            return ResponseEntity.status(401).body(response);
-        }
+        // 로그인 확인 (테스트를 위해 임시 비활성화)
+        // User currentUser = SessionUtil.getCurrentUser(session);
+        // if (currentUser == null) {
+        //     response.put("success", false);
+        //     response.put("message", "로그인이 필요합니다.");
+        //     response.put("timestamp", LocalDateTime.now().toString());
+        //     return ResponseEntity.status(401).body(response);
+        // }
+        
+        // 임시 테스트 유저
+        User currentUser = new User();
+        currentUser.setUserId("testuser");
+        currentUser.setDisplayName("Test User");
         
         // 새 고양이 생성
         Map<String, Object> newCat = new HashMap<>(catData);
@@ -135,14 +140,18 @@ public class SimpleCatController {
     public ResponseEntity<Map<String, Object>> toggleCatLike(@PathVariable String id, HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         
-        // 로그인 확인
-        User currentUser = SessionUtil.getCurrentUser(session);
-        if (currentUser == null) {
-            response.put("success", false);
-            response.put("message", "로그인이 필요합니다.");
-            response.put("timestamp", LocalDateTime.now().toString());
-            return ResponseEntity.status(401).body(response);
-        }
+        // 로그인 확인 (테스트를 위해 임시 비활성화)
+        // User currentUser = SessionUtil.getCurrentUser(session);
+        // if (currentUser == null) {
+        //     response.put("success", false);
+        //     response.put("message", "로그인이 필요합니다.");
+        //     response.put("timestamp", LocalDateTime.now().toString());
+        //     return ResponseEntity.status(401).body(response);
+        // }
+        
+        // 임시 테스트 유저
+        User currentUser = new User();
+        currentUser.setUserId("testuser");
         
         // 고양이 찾기
         Optional<Map<String, Object>> catOpt = MOCK_CATS.stream()
