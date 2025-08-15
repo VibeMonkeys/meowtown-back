@@ -20,7 +20,7 @@ public class AuthService {
      */
     public User register(String userId, String email, String displayName, String password) {
         // 중복 체크
-        if (userRepository.existsByUserId(userId)) {
+        if (userRepository.existsByUsername(userId)) {
             throw new IllegalArgumentException("이미 존재하는 사용자 ID입니다.");
         }
         
@@ -30,10 +30,10 @@ public class AuthService {
         
         // 사용자 생성
         User user = User.builder()
-                .userId(userId)
+                .username(userId)
                 .email(email)
                 .displayName(displayName)
-                .password(password) // 간단히 평문 저장
+                .passwordHash(password) // 간단히 평문 저장
                 .build();
         
         return userRepository.save(user);
@@ -43,12 +43,12 @@ public class AuthService {
      * 로그인
      */
     public Optional<User> login(String userId, String password) {
-        Optional<User> userOpt = userRepository.findByUserId(userId);
+        Optional<User> userOpt = userRepository.findByUsername(userId);
         
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             // 비밀번호 확인 (간단히 평문 비교)
-            if (password.equals(user.getPassword())) {
+            if (password.equals(user.getPasswordHash())) {
                 return Optional.of(user);
             }
         }
@@ -60,6 +60,6 @@ public class AuthService {
      * 사용자 조회
      */
     public Optional<User> findByUserId(String userId) {
-        return userRepository.findByUserId(userId);
+        return userRepository.findByUsername(userId);
     }
 }

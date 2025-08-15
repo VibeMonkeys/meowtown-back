@@ -32,7 +32,7 @@ public class SessionUtil {
      * 세션에 사용자 정보 저장
      */
     public static void setUser(HttpSession session, User user) {
-        session.setAttribute("userId", user.getUserId());
+        session.setAttribute("userId", user.getUsername());
         session.setAttribute("user", user);
     }
     
